@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@noble/secp256k1": "^2.0.0",
     "axios": "^1.5.1",
     "ethereum-cryptography": "^2.1.2",
     "lucide-react": "^0.284.0",

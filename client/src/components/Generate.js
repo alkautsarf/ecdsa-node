@@ -54,6 +54,7 @@ export default function Generate({ setModal }) {
             <h2>Private Key : {privateKey}</h2>
             <h2>Address : {address} </h2>
             <br/>
+            <h1 className="text-red-500 text-sm italic">This window will only show once.</h1>
             <h1 className="text-red-500 text-sm italic">Store this key in a save place !!!</h1>
           </div>
         )}

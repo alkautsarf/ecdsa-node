@@ -1,6 +1,10 @@
 import { useState } from "react";
 import server from "./server";
 import { ArrowRightLeft } from 'lucide-react';
+import { secp256k1 } from 'ethereum-cryptography/secp256k1';
+import { toHex, utf8ToBytes } from "ethereum-cryptography/utils";
+import { keccak256 } from "ethereum-cryptography/keccak";
+
 
 
 export default function Transfer({ address, setBalance }) {
@@ -8,21 +12,43 @@ export default function Transfer({ address, setBalance }) {
   const [recipient, setRecipient] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
+  
+  // async function signMessage(msg) {
+  //   return await secp.signAsync(keccak256(utf8ToBytes(msg)), localStorage.getItem("privateKey"))
+  // }
+  function hashMessage(message) {
+    return keccak256(utf8ToBytes(message))
+  }
+  
+  function verified(signature, publicKey) {
+    console.log(signature);
+    return secp256k1.verify(signature, hashMessage('send'),publicKey)
+  }
 
-  async function transfer(evt) {
+  async function transfer(evt, msg) {
     evt.preventDefault();
-    try {
-      const {
-        data: { balance },
-      } = await server.post(`send`, {
-        sender: address,
-        amount: parseInt(sendAmount),
-        recipient,
-      });
-      setBalance(balance);
-    } catch (ex) {
-      alert(ex.response.data.message);
+    if(localStorage.getItem("privateKey") === null) {
+      alert("Please login first")
+      return
     }
+    try {
+        const sender = `0x${toHex(keccak256(secp256k1.getPublicKey(localStorage.getItem("privateKey")).slice(1)).slice(-20))}`
+        const signature = secp256k1.sign(keccak256(utf8ToBytes(msg)), localStorage.getItem("privateKey"))
+        const publicKey = toHex(secp256k1.getPublicKey(localStorage.getItem("privateKey")))
+        if(verified(signature, publicKey)) {
+          const {
+            data: { balance },
+          } = await server.post(`send`, {
+            sender,
+            amount: parseInt(sendAmount),
+            recipient,
+          });
+          setBalance(balance);
+        }
+      } catch (ex) {
+        alert('Invalid Private Key');
+      }
+    
   }
   return (
     <form
@@ -50,8 +76,8 @@ export default function Transfer({ address, setBalance }) {
           onChange={setValue(setRecipient)}
         />
       </label>
-      <div className="flex justify-center items-center bg-[#0285c7] bg-opacity-90 rounded-xl hover:scale-[101%] transform transition-transform cursor-pointer" onClick={(e) =>transfer(e)} >
-        <h2 className="text-white p-3" >Transfer</h2>
+      <div className="flex justify-center items-center bg-[#0285c7] bg-opacity-90 rounded-xl hover:scale-[101%] transform transition-transform cursor-pointer" onClick={(e) =>transfer(e, 'send')} >
+        <h2 className="text-white font-bold p-3" >Transfer</h2>
       </div>
     </form>
   );

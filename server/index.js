@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { generate } = require("./generate");
+const { generate, login, recoverKey, verified } = require("./scripts");
 const port = 3042;
 
 app.use(cors());
@@ -16,6 +16,7 @@ const balances = {
 app.get("/balance/:address", (req, res) => {
   const { address } = req.params;
   const balance = balances[address] || 0;
+  console.log(balances);
   res.send({ balance });
 });
 
@@ -26,7 +27,8 @@ app.get('/create', (req, res) => {
 })
 
 app.post("/send", (req, res) => {
-  const { sender, recipient, amount } = req.body;
+  const { sender, recipient, amount} = req.body;
+
 
   setInitialBalance(sender);
   setInitialBalance(recipient);
@@ -39,6 +41,12 @@ app.post("/send", (req, res) => {
     res.send({ balance: balances[sender] });
   }
 });
+
+app.post('/login', (req, res) => {
+  if(login(req.body.privateKey, balances)) {
+    res.send(true)
+  } else res.status(401).send({message: "Invalid Private Key"})
+})
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}!`);
