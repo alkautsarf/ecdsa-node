@@ -91,6 +91,7 @@ export default function Wallet({
               onClick={(e) => {
                 e.preventDefault();
                 setLogin(false);
+                setBalance(0)
                 localStorage.removeItem("privateKey");
               }}
             >

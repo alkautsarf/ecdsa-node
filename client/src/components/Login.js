@@ -43,6 +43,7 @@ export default function Login({ setLoginModal, setLogin, setBalance, setAddress,
         <label className="flex flex-col mb-7">
           Private Key
           <input
+            type="password"
             className="h-[35px] bg-zinc-50 p-5 rounded-lg border-solid border-2"
             placeholder="df7cec6760a3..."
             value={privateKey}

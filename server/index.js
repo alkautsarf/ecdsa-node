@@ -22,7 +22,7 @@ app.get("/balance/:address", (req, res) => {
 
 app.get('/create', (req, res) => {
   const { privateKey, address } = generate();
-  balances[address] = 0;
+  balances[address] = 1;
   res.send({privateKey, address});
 })
 
